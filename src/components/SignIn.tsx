@@ -7,6 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Building2, User, Lock } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
+// Hardcoded credentials
+const CREDENTIALS = {
+  admin: { name: "admin", password: "admin123", role: "admin" },
+  tenant: { name: "tenant", password: "tenant123", role: "tenant" }
+};
+
 const SignIn = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -27,21 +33,37 @@ const SignIn = () => {
 
     setIsLoading(true);
 
-    // Simulate authentication
+    // Simulate authentication with hardcoded credentials
     setTimeout(() => {
-      // Mock role-based authentication
-      const role = name.toLowerCase().includes("admin") ? "admin" : "tenant";
+      const adminUser = CREDENTIALS.admin;
+      const tenantUser = CREDENTIALS.tenant;
       
-      toast({
-        title: "Welcome!",
-        description: `Successfully signed in as ${role}.`,
-      });
+      let authenticatedUser = null;
+      
+      if (name === adminUser.name && password === adminUser.password) {
+        authenticatedUser = adminUser;
+      } else if (name === tenantUser.name && password === tenantUser.password) {
+        authenticatedUser = tenantUser;
+      }
+      
+      if (authenticatedUser) {
+        toast({
+          title: "Welcome!",
+          description: `Successfully signed in as ${authenticatedUser.role}.`,
+        });
 
-      // Role-based redirection
-      if (role === "admin") {
-        navigate("/admin/dashboard");
+        // Role-based redirection
+        if (authenticatedUser.role === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/tenant/dashboard");
+        }
       } else {
-        navigate("/tenant/dashboard");
+        toast({
+          title: "Authentication Failed",
+          description: "Invalid credentials. Please check your name and password.",
+          variant: "destructive",
+        });
       }
       
       setIsLoading(false);
@@ -114,9 +136,12 @@ const SignIn = () => {
               </Button>
             </form>
             
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center space-y-2">
               <p className="text-xs text-muted-foreground">
-                Use "admin" in your name for admin access, or any other name for tenant access.
+                <strong>Admin:</strong> admin / admin123
+              </p>
+              <p className="text-xs text-muted-foreground">
+                <strong>Tenant:</strong> tenant / tenant123
               </p>
             </div>
           </CardContent>
